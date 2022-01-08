@@ -1,0 +1,14 @@
+# ignore_files
+
+.vscode/
+Projects/bk-double-rx/MDK-ARM/Listings/
+Projects/bk-double-rx/MDK-ARM/Objects/
+Projects/bk-double-rx/MDK-ARM/DebugConfig/
+Projects/bk-double-rx/MDK-ARM/Project.uvguix.*
+Projects/bk-double-rx/MDK-ARM/EventRecorderStub.*
+Projects/bk-double-rx/MDK-ARM/JLink*
+
+develop_lib/
+
+*.DS_Store/
+
