@@ -40,5 +40,9 @@ void bk953x_loop_task(void);
 
 void bk953x_task_stage_set(bk953x_lr_e lr, bk953x_task_stage_e stage);
 
+int bk953x_rf_rssi_get(bk953x_lr_e lr, uint8_t *p_level);
+
+int bk953x_af_get(bk953x_lr_e lr, uint8_t *p_level);
+
 
 #endif

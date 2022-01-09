@@ -281,12 +281,10 @@ static void host_loop_task(void)
 
 int main(void)
 {
-  int err_code = 0;
-
   trace_init();
 
   /*greeting*/
-  trace_info("\n\r\n\r");
+  trace_info("\n\r\n\r\n\r\n\r");
   trace_info("       *** Welcome to the meeting-machine Project ***\n\r");
   trace_info("\n\r");
 
@@ -349,7 +347,7 @@ int main(void)
 #endif
   APP_SCHED_INIT(&m_app_scheduler, SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
 
-  app_sched_event_put(&m_app_scheduler, NULL, 0, app_evt_schedule);
+//  app_sched_event_put(&m_app_scheduler, NULL, 0, app_evt_schedule);
 
 
   trace_info("Start loop\n\r");

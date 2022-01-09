@@ -85,14 +85,14 @@ int bk9532_lr_init(void)
     m_l_bk9532_obj.mid_bk953x_object.virt_i2c_object.scl_gpio_pin = L_VIRT_SCL_PIN;
 #endif
 
-    bk953x_res_init(&m_r_bk9532_obj);
-    bk953x_res_init(&m_l_bk9532_obj);
+    bk9532_res_init(&m_r_bk9532_obj);
+    bk9532_res_init(&m_l_bk9532_obj);
     //硬件复位
     m_r_bk9532_obj.hw_reset_handler();
     m_l_bk9532_obj.hw_reset_handler();
 
-    bk953x_chip_id_get(&m_r_bk9532_obj);
-    bk953x_chip_id_get(&m_l_bk9532_obj);
+    bk9532_chip_id_get(&m_r_bk9532_obj);
+    bk9532_chip_id_get(&m_l_bk9532_obj);
 
     trace_debug("r_chip_id = 0x%08x , l_chip_id = 0x%08x\n\r",m_r_bk9532_obj.chip_id, m_l_bk9532_obj.chip_id);
 
@@ -119,13 +119,13 @@ static void bk953x_stage_task_run(bk953x_task_t *p_task)
     switch(p_task->stage)
     {
         case BK_STAGE_INIT:
-            err_code = bk953x_config_init(p_task->p_bk953x_object);
+            err_code = bk9532_config_init(p_task->p_bk953x_object);
             if(err_code == 0)
             {
                 trace_debug("bk953x_config_init success\n\r");
             }
 
-            err_code = bk953x_ch_index_set(BK953X_L, 1);
+            err_code = bk9532_ch_index_set(BK953X_L, 1);
             if(err_code)
             {
                 trace_error("l ch index set error\n\r");
@@ -135,7 +135,7 @@ static void bk953x_stage_task_run(bk953x_task_t *p_task)
                 trace_debug("l ch index set success\n\r");
             }
 
-            err_code = bk953x_ch_index_set(BK953X_R, 101);
+            err_code = bk9532_ch_index_set(BK953X_R, 101);
             if(err_code)
             {
                 trace_error("r ch index set error\n\r");
@@ -152,7 +152,7 @@ static void bk953x_stage_task_run(bk953x_task_t *p_task)
             if( mid_timer_ticks_get() - old_ticks > 1000)
             {
                 old_ticks = mid_timer_ticks_get();
-                err_code = bk953x_rx_spec_data_get(&m_l_bk9532_obj, &rx_spec_data);
+                err_code = bk9532_rx_spec_data_get(&m_l_bk9532_obj, &rx_spec_data);
                 if(!err_code)
                 {
                     trace_debug("bk953x_rx_spec_data_get rx_spec_data = 0x%02x\n\r",rx_spec_data);
@@ -194,7 +194,7 @@ void bk953x_task_stage_set(bk953x_lr_e lr, bk953x_task_stage_e stage)
 /**
  * @brief 设置通道序号来获取对应寄存器的值
  */
-int bk953x_ch_index_set(bk953x_lr_e lr, uint16_t chan_index)
+int bk9532_ch_index_set(bk953x_lr_e lr, uint16_t chan_index)
 {
     freq_chan_object_t freq_chan_obj;
 
@@ -209,7 +209,7 @@ int bk953x_ch_index_set(bk953x_lr_e lr, uint16_t chan_index)
 
         freq_chan_obj.reg_value = BK9532_FREQ_632_MHZ + BK9532_FREQ_0_3_MHZ * (chan_index - SCREEN_L_CHANNEL_INDEX_MIN);
 
-        return bk953x_freq_chan_set(&m_l_bk9532_obj, &freq_chan_obj);
+        return bk9532_freq_chan_set(&m_l_bk9532_obj, &freq_chan_obj);
     }
     else
     {
@@ -220,7 +220,7 @@ int bk953x_ch_index_set(bk953x_lr_e lr, uint16_t chan_index)
 
         freq_chan_obj.reg_value = BK9532_FREQ_660_MHZ + BK9532_FREQ_0_3_MHZ * (chan_index - SCREEN_R_CHANNEL_INDEX_MIN);
 
-        return bk953x_freq_chan_set(&m_r_bk9532_obj, &freq_chan_obj);
+        return bk9532_freq_chan_set(&m_r_bk9532_obj, &freq_chan_obj);
     }
 }
 
@@ -231,13 +231,13 @@ int bk953x_rf_rssi_get(bk953x_lr_e lr, uint8_t *p_level)
 
     if(lr == BK953X_L)
     {
-        err_code = bk953x_rx_rssi_get(&m_l_bk9532_obj, &rssi);
+        err_code = bk9532_rx_rssi_get(&m_l_bk9532_obj, &rssi);
 
         trace_debug("l rssi = %d\n\r",rssi);
     }
     else
     {
-        err_code = bk953x_rx_rssi_get(&m_r_bk9532_obj, &rssi);
+        err_code = bk9532_rx_rssi_get(&m_r_bk9532_obj, &rssi);
 
         trace_debug("r rssi = %d\n\r",rssi);
     }
@@ -280,13 +280,13 @@ int bk953x_af_get(bk953x_lr_e lr, uint8_t *p_level)
 
     if(lr == BK953X_L)
     {
-        err_code = bk953x_rx_vol_get(&m_l_bk9532_obj, &af_vol);
+        err_code = bk9532_rx_vol_get(&m_l_bk9532_obj, &af_vol);
 
         trace_debug("l af = %d\n\r",af_vol);
     }
     else
     {
-        err_code = bk953x_rx_vol_get(&m_r_bk9532_obj, &af_vol);
+        err_code = bk9532_rx_vol_get(&m_r_bk9532_obj, &af_vol);
 
         trace_debug("r af = %d\n\r",af_vol);
     }

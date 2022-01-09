@@ -534,11 +534,6 @@
               <FilePath>..\..\..\develop_lib\hardware\st7789\st7789.c</FilePath>
             </File>
             <File>
-              <FileName>bk953x.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\develop_lib\hardware\bk953x\bk953x.c</FilePath>
-            </File>
-            <File>
               <FileName>ht1621.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\develop_lib\hardware\ht1621\ht1621.c</FilePath>
@@ -547,6 +542,11 @@
               <FileName>seg_code.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\develop_lib\hardware\ht1621\seg_code.c</FilePath>
+            </File>
+            <File>
+              <FileName>bk9532.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\develop_lib\hardware\bk953x\bk9532.c</FilePath>
             </File>
           </Files>
         </Group>

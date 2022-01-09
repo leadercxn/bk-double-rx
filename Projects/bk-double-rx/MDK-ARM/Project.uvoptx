@@ -617,8 +617,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\develop_lib\hardware\bk953x\bk953x.c</PathWithFileName>
-      <FilenameWithoutPath>bk953x.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\develop_lib\hardware\ht1621\ht1621.c</PathWithFileName>
+      <FilenameWithoutPath>ht1621.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -629,8 +629,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\develop_lib\hardware\ht1621\ht1621.c</PathWithFileName>
-      <FilenameWithoutPath>ht1621.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\develop_lib\hardware\ht1621\seg_code.c</PathWithFileName>
+      <FilenameWithoutPath>seg_code.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -641,8 +641,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\develop_lib\hardware\ht1621\seg_code.c</PathWithFileName>
-      <FilenameWithoutPath>seg_code.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\develop_lib\hardware\bk953x\bk9532.c</PathWithFileName>
+      <FilenameWithoutPath>bk9532.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
