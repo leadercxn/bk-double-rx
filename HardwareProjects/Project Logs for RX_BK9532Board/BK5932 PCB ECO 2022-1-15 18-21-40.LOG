@@ -1,0 +1,147 @@
+Removed Pin From Net: NetName=GND Pin=U*-33
+Removed Member From Class: ClassName=core Member=U*
+Added Component: Designator=ANT1(ANT)
+Added Component: Designator=ANT2(ANT)
+Added Component: Designator=C1(C0603)
+Added Component: Designator=C2(C0603)
+Added Component: Designator=C3(C0805)
+Added Component: Designator=C4(C0805)
+Added Component: Designator=C5(C0805)
+Added Component: Designator=C6(C0805)
+Added Component: Designator=C7(C0603)
+Added Component: Designator=C8(C0805)
+Added Component: Designator=C9(C0603)
+Added Component: Designator=C10(C0805)
+Added Component: Designator=C11(C0805)
+Added Component: Designator=C12(C0805)
+Added Component: Designator=C13(C0805)
+Added Component: Designator=C14(C0805)
+Added Component: Designator=C15(C0805)
+Added Component: Designator=C16(C0805)
+Added Component: Designator=C17(C0805)
+Added Component: Designator=D1(LED 0805)
+Added Component: Designator=ESD1(LL 34)
+Added Component: Designator=ESD2(LL 34)
+Added Component: Designator=R1(R1206)
+Added Component: Designator=R2(R1206)
+Added Component: Designator=U1(QFN32)
+Added Component: Designator=Y1(晶振   有源2520)
+Added Pin To Net: NetName=GND Pin=C1-1
+Added Pin To Net: NetName=GND Pin=C2-1
+Added Pin To Net: NetName=GND Pin=C3-2
+Added Pin To Net: NetName=GND Pin=C4-2
+Added Pin To Net: NetName=GND Pin=C5-1
+Added Pin To Net: NetName=GND Pin=C6-1
+Added Pin To Net: NetName=GND Pin=C8-1
+Added Pin To Net: NetName=GND Pin=C10-1
+Added Pin To Net: NetName=GND Pin=C11-1
+Added Pin To Net: NetName=GND Pin=C12-1
+Added Pin To Net: NetName=GND Pin=C13-1
+Added Pin To Net: NetName=GND Pin=C16-1
+Added Pin To Net: NetName=GND Pin=C17-1
+Added Pin To Net: NetName=GND Pin=D1-2
+Added Pin To Net: NetName=GND Pin=ESD1-2
+Added Pin To Net: NetName=GND Pin=ESD2-1
+Added Pin To Net: NetName=GND Pin=U1-33
+Added Pin To Net: NetName=GND Pin=Y1-2
+Added Pin To Net: NetName=GND Pin=Y1-4
+Added Pin To Net: NetName=AON Pin=C14-1
+Added Net: Name=AON
+Added Pin To Net: NetName=AOP Pin=C15-1
+Added Net: Name=AOP
+Added Pin To Net: NetName=NetANT1_1 Pin=ANT1-1
+Added Pin To Net: NetName=NetANT1_1 Pin=C7-1
+Added Pin To Net: NetName=NetANT1_1 Pin=ESD1-1
+Added Net: Name=NetANT1_1
+Added Pin To Net: NetName=NetANT2_1 Pin=ANT2-1
+Added Pin To Net: NetName=NetANT2_1 Pin=C9-1
+Added Pin To Net: NetName=NetANT2_1 Pin=ESD2-2
+Added Net: Name=NetANT2_1
+Added Pin To Net: NetName=NetC1_2 Pin=C1-2
+Added Pin To Net: NetName=NetC1_2 Pin=U1-28
+Added Pin To Net: NetName=NetC1_2 Pin=Y1-1
+Added Net: Name=NetC1_2
+Added Pin To Net: NetName=NetC2_2 Pin=C2-2
+Added Pin To Net: NetName=NetC2_2 Pin=U1-27
+Added Pin To Net: NetName=NetC2_2 Pin=Y1-3
+Added Net: Name=NetC2_2
+Added Pin To Net: NetName=NetC3_1 Pin=C3-1
+Added Pin To Net: NetName=NetC3_1 Pin=C4-1
+Added Pin To Net: NetName=NetC3_1 Pin=C6-2
+Added Pin To Net: NetName=NetC3_1 Pin=C8-2
+Added Pin To Net: NetName=NetC3_1 Pin=C11-2
+Added Pin To Net: NetName=NetC3_1 Pin=C12-2
+Added Pin To Net: NetName=NetC3_1 Pin=C13-2
+Added Pin To Net: NetName=NetC3_1 Pin=U1-3
+Added Pin To Net: NetName=NetC3_1 Pin=U1-4
+Added Pin To Net: NetName=NetC3_1 Pin=U1-8
+Added Pin To Net: NetName=NetC3_1 Pin=U1-12
+Added Pin To Net: NetName=NetC3_1 Pin=U1-16
+Added Pin To Net: NetName=NetC3_1 Pin=U1-25
+Added Pin To Net: NetName=NetC3_1 Pin=U1-26
+Added Pin To Net: NetName=NetC3_1 Pin=U1-29
+Added Net: Name=NetC3_1
+Added Pin To Net: NetName=NetC5_2 Pin=C5-2
+Added Pin To Net: NetName=NetC5_2 Pin=U1-2
+Added Net: Name=NetC5_2
+Added Pin To Net: NetName=NetC7_2 Pin=C7-2
+Added Pin To Net: NetName=NetC7_2 Pin=U1-5
+Added Net: Name=NetC7_2
+Added Pin To Net: NetName=NetC9_2 Pin=C9-2
+Added Pin To Net: NetName=NetC9_2 Pin=U1-6
+Added Net: Name=NetC9_2
+Added Pin To Net: NetName=NetC10_2 Pin=C10-2
+Added Pin To Net: NetName=NetC10_2 Pin=U1-7
+Added Net: Name=NetC10_2
+Added Pin To Net: NetName=NetC14_2 Pin=C14-2
+Added Pin To Net: NetName=NetC14_2 Pin=U1-10
+Added Net: Name=NetC14_2
+Added Pin To Net: NetName=NetC15_2 Pin=C15-2
+Added Pin To Net: NetName=NetC15_2 Pin=U1-11
+Added Net: Name=NetC15_2
+Added Pin To Net: NetName=NetC17_2 Pin=C17-2
+Added Pin To Net: NetName=NetC17_2 Pin=R2-1
+Added Net: Name=NetC17_2
+Added Pin To Net: NetName=NetD1_1 Pin=D1-1
+Added Pin To Net: NetName=NetD1_1 Pin=R1-1
+Added Net: Name=NetD1_1
+Added Pin To Net: NetName=NetR1_2 Pin=R1-2
+Added Pin To Net: NetName=NetR1_2 Pin=U1-21
+Added Net: Name=NetR1_2
+Added Pin To Net: NetName=NetR2_2 Pin=R2-2
+Added Pin To Net: NetName=NetR2_2 Pin=U1-14
+Added Net: Name=NetR2_2
+Added Pin To Net: NetName=RF_CE Pin=U1-9
+Added Net: Name=RF_CE
+Added Pin To Net: NetName=RF_SCK Pin=U1-22
+Added Net: Name=RF_SCK
+Added Pin To Net: NetName=RF_SDA Pin=U1-23
+Added Net: Name=RF_SDA
+Added Pin To Net: NetName=VCC3.3 Pin=C16-2
+Added Net: Name=VCC3.3
+Added Member To Class: ClassName=core Member=Component ANT1 弹簧天线
+Added Member To Class: ClassName=core Member=Component ANT2 弹簧天线
+Added Member To Class: ClassName=core Member=Component C1 10pF
+Added Member To Class: ClassName=core Member=Component C2 10pF
+Added Member To Class: ClassName=core Member=Component C3 1uF
+Added Member To Class: ClassName=core Member=Component C4 1uF
+Added Member To Class: ClassName=core Member=Component C5 4.7uF
+Added Member To Class: ClassName=core Member=Component C6 1uF
+Added Member To Class: ClassName=core Member=Component C7 30pF
+Added Member To Class: ClassName=core Member=Component C8 0.1uF
+Added Member To Class: ClassName=core Member=Component C9 30pF
+Added Member To Class: ClassName=core Member=Component C10 4.7uF
+Added Member To Class: ClassName=core Member=Component C11 10uF
+Added Member To Class: ClassName=core Member=Component C12 1uF
+Added Member To Class: ClassName=core Member=Component C13 1uF
+Added Member To Class: ClassName=core Member=Component C14 2.2uF
+Added Member To Class: ClassName=core Member=Component C15 2.2uF
+Added Member To Class: ClassName=core Member=Component C16 10uF
+Added Member To Class: ClassName=core Member=Component C17 1uF
+Added Member To Class: ClassName=core Member=Component D1 普红
+Added Member To Class: ClassName=core Member=Component ESD1 3V3
+Added Member To Class: ClassName=core Member=Component ESD2 3V3
+Added Member To Class: ClassName=core Member=Component R1 K
+Added Member To Class: ClassName=core Member=Component R2 27R
+Added Member To Class: ClassName=core Member=Component U1 BK9532
+Added Member To Class: ClassName=core Member=Component Y1 24.576M

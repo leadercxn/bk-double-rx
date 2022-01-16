@@ -1,0 +1,4 @@
+Change Component Description : Designator=Y1 Old Description=£¨Î´Èë¿â£©25.576MHz  49SMD New Description=£¨Î´Èë¿â£©24.576MHz  2520
+Added Pin To Net: NetName=GND Pin=U2-1
+Added Pin To Net: NetName=+5V Pin=U2-2
+Added Net: Name=+5V
