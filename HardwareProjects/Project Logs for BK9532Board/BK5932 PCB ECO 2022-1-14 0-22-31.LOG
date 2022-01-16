@@ -1,5 +1,0 @@
-Added Component: Designator=U*(QFN32)
-Added Pin To Net: NetName=GND Pin=U*-33
-Added Net: Name=GND
-Added Class: Name=core
-Added Room: Name=core
