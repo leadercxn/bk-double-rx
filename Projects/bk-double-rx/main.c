@@ -245,7 +245,7 @@ static void host_loop_task(void)
   static uint64_t old_ir_ticks = 0;
   
   /* 15ms 刷新一次 */
-  if( mid_timer_ticks_get() - old_bk9532_ticks > 1000)
+  if( mid_timer_ticks_get() - old_bk9532_ticks > 100)
   {
     old_bk9532_ticks = mid_timer_ticks_get();
 
@@ -346,9 +346,6 @@ int main(void)
   }
 #endif
   APP_SCHED_INIT(&m_app_scheduler, SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
-
-//  app_sched_event_put(&m_app_scheduler, NULL, 0, app_evt_schedule);
-
 
   trace_info("Start loop\n\r");
   while(1)

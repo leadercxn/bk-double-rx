@@ -233,35 +233,35 @@ int bk953x_rf_rssi_get(bk953x_lr_e lr, uint8_t *p_level)
     {
         err_code = bk9532_rx_rssi_get(&m_l_bk9532_obj, &rssi);
 
-        trace_debug("l rssi = %d\n\r",rssi);
+//        trace_debug("l rssi = %d\n\r",rssi);
     }
     else
     {
         err_code = bk9532_rx_rssi_get(&m_r_bk9532_obj, &rssi);
 
-        trace_debug("r rssi = %d\n\r",rssi);
+//        trace_debug("r rssi = %d\n\r",rssi);
     }
 
     /**
      * rssi: 8 bit
      */
-    if(rssi > 150)
+    if(rssi > 70)
     {
         *p_level = 5;
     }
-    else if(rssi > 110)
+    else if(rssi > 65)
     {
         *p_level = 4;
     }
-    else if(rssi > 90)
+    else if(rssi > 60)
     {
         *p_level = 3;
     }
-    else if(rssi > 60)
+    else if(rssi > 55)
     {
         *p_level = 2;
     }
-    else if(rssi > 20)
+    else if(rssi > 50)
     {
         *p_level = 1;
     }
@@ -282,13 +282,13 @@ int bk953x_af_get(bk953x_lr_e lr, uint8_t *p_level)
     {
         err_code = bk9532_rx_vol_get(&m_l_bk9532_obj, &af_vol);
 
-        trace_debug("l af = %d\n\r",af_vol);
+//        trace_debug("l af = %d\n\r",af_vol);
     }
     else
     {
         err_code = bk9532_rx_vol_get(&m_r_bk9532_obj, &af_vol);
 
-        trace_debug("r af = %d\n\r",af_vol);
+//        trace_debug("r af = %d\n\r",af_vol);
     }
 
     /**
