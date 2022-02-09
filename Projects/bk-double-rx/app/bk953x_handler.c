@@ -9,44 +9,32 @@ static bk953x_object_t m_r_bk9532_obj;
 static gpio_object_t   m_l_bk9532_rst;
 static gpio_object_t   m_r_bk9532_rst;
 
+
 typedef struct
 {
+    bk953x_lr_e         lr_flag;
     bk953x_task_stage_e stage;
+    uint64_t            rd_spec_data_old_ticks;
     bk953x_object_t     *p_bk953x_object;
+    union user_spec_data user_date;
 } bk953x_task_t;
 
 static bk953x_task_t m_l_bk953x_task = {
     .p_bk953x_object = &m_l_bk9532_obj,
     .stage = BK_STAGE_INIT,
+    .lr_flag = BK953X_L,
+    .rd_spec_data_old_ticks = 0,
+    .user_date.byte = 0,
 };
 
 static bk953x_task_t m_r_bk953x_task = {
     .p_bk953x_object = &m_r_bk9532_obj,
     .stage = BK_STAGE_INIT,
+    .lr_flag = BK953X_R,
+    .rd_spec_data_old_ticks = 0,
+    .user_date.byte = 0,
 };
 
-/**
- * @warning 复位要适当的延时，别太快
- */
-static void r_bk953x_hw_reset(void)
-{
-    gpio_config(&m_r_bk9532_rst);
-
-    gpio_output_set(&m_r_bk9532_rst, 0);
-    delay_ms(50);
-    gpio_output_set(&m_r_bk9532_rst, 1);
-    delay_ms(100);
-}
-
-static void l_bk953x_hw_reset(void)
-{
-    gpio_config(&m_l_bk9532_rst);
-
-    gpio_output_set(&m_l_bk9532_rst, 0);
-    delay_ms(50);
-    gpio_output_set(&m_l_bk9532_rst, 1);
-    delay_ms(100);
-}
 
 int bk9532_lr_init(void)
 {
@@ -66,9 +54,6 @@ int bk9532_lr_init(void)
     m_r_bk9532_rst.gpio_dir = GPIO_DIR_OUTPUR;
     m_r_bk9532_rst.gpio_pin = R_BK9532_CE_PIN;
 
-    m_r_bk9532_obj.hw_reset_handler = r_bk953x_hw_reset;
-    m_l_bk9532_obj.hw_reset_handler = l_bk953x_hw_reset;
-
 #ifdef FT32
     m_r_bk9532_obj.mid_bk953x_object.virt_i2c_object.sda_port_periph_clk = R_VIRT_SDA_GPIO_CLK;
     m_r_bk9532_obj.mid_bk953x_object.virt_i2c_object.scl_port_periph_clk = R_VIRT_SCL_GPIO_CLK;
@@ -84,17 +69,11 @@ int bk9532_lr_init(void)
     m_l_bk9532_obj.mid_bk953x_object.virt_i2c_object.sda_gpio_pin = L_VIRT_SDA_PIN;
     m_l_bk9532_obj.mid_bk953x_object.virt_i2c_object.scl_gpio_pin = L_VIRT_SCL_PIN;
 #endif
+    m_r_bk9532_obj.p_rst_gpio = (void *)&m_r_bk9532_rst;
+    m_l_bk9532_obj.p_rst_gpio = (void *)&m_l_bk9532_rst;
 
     bk9532_res_init(&m_r_bk9532_obj);
     bk9532_res_init(&m_l_bk9532_obj);
-    //硬件复位
-    m_r_bk9532_obj.hw_reset_handler();
-    m_l_bk9532_obj.hw_reset_handler();
-
-    bk9532_chip_id_get(&m_r_bk9532_obj);
-    bk9532_chip_id_get(&m_l_bk9532_obj);
-
-    trace_debug("r_chip_id = 0x%08x , l_chip_id = 0x%08x\n\r",m_r_bk9532_obj.chip_id, m_l_bk9532_obj.chip_id);
 
     return err_code;
 }
@@ -110,62 +89,98 @@ static int bk953x_rx_channel_search(bk953x_object_t *p_bk953x_object)
     return err_code;
 }
 
+static int bk953x_singal_check(bk953x_object_t *p_bk953x_object)
+{
+    IS_NULL(p_bk953x_object);
+
+    if(bk9532_is_receive_single(p_bk953x_object))
+    {
+
+    }
+    else
+    {
+
+    }
+}
+
 static void bk953x_stage_task_run(bk953x_task_t *p_task)
 {
     int err_code = 0;
-    uint8_t rx_spec_data = 0;
-    static uint64_t old_ticks = 0;
 
     switch(p_task->stage)
     {
         case BK_STAGE_INIT:
+
+            /**
+             * 硬件复位，复位要适当的延时，别太快
+             */
+            gpio_config(p_task->p_bk953x_object->p_rst_gpio);
+
+            gpio_output_set(p_task->p_bk953x_object->p_rst_gpio, 1);
+            delay_ms(50);
+            gpio_output_set(p_task->p_bk953x_object->p_rst_gpio, 0);
+            delay_ms(50);
+            gpio_output_set(p_task->p_bk953x_object->p_rst_gpio, 1);
+            delay_ms(100);
+
+            bk9532_chip_id_get(p_task->p_bk953x_object);
+
+            if(p_task->lr_flag == BK953X_L)
+            {
+                trace_debug("l_chip_id = 0x%08x\n\r",p_task->p_bk953x_object->chip_id);
+            }
+            else
+            {
+                trace_debug("r_chip_id = 0x%08x\n\r",p_task->p_bk953x_object->chip_id);
+            }
+
+            /**
+             * 寄存器配置
+             */
             err_code = bk9532_config_init(p_task->p_bk953x_object);
             if(err_code == 0)
             {
                 trace_debug("bk953x_config_init success\n\r");
             }
 
-            err_code = bk9532_ch_index_set(BK953X_L, 1);
+            /**
+             * 通道设置
+             */
+            err_code = bk9532_ch_index_set(p_task->lr_flag, p_task->p_bk953x_object->freq_chan_index);
             if(err_code)
             {
-                trace_error("l ch index set error\n\r");
+                trace_error("ch index set error\n\r");
             }
             else
             {
-                trace_debug("l ch index set success\n\r");
-            }
-
-            err_code = bk9532_ch_index_set(BK953X_R, 101);
-            if(err_code)
-            {
-                trace_error("r ch index set error\n\r");
-            }
-            else
-            {
-                trace_debug("r ch index set success\n\r");
+                trace_debug("ch index %d set success\n\r",p_task->p_bk953x_object->freq_chan_index);
             }
 
             p_task->stage++;
             break;
 
         case BK_STAGE_NORMAL:
-            if( mid_timer_ticks_get() - old_ticks > 1000)
+            if( mid_timer_ticks_get() - p_task->rd_spec_data_old_ticks > 500)
             {
-                old_ticks = mid_timer_ticks_get();
-                err_code = bk9532_rx_spec_data_get(&m_l_bk9532_obj, &rx_spec_data);
+                p_task->rd_spec_data_old_ticks = mid_timer_ticks_get();
+                err_code = bk9532_rx_spec_data_get(p_task->p_bk953x_object, &p_task->user_date.byte);
                 if(!err_code)
                 {
-                    trace_debug("bk953x_rx_spec_data_get rx_spec_data = 0x%02x\n\r",rx_spec_data);
+                    trace_debug("lr_flag %d user_date = 0x%02x\n\r",p_task->lr_flag,p_task->user_date.byte);
                 }
             }
+            bk953x_singal_check(p_task->p_bk953x_object);
             break;
 
         case BK_STAGE_SEARCHING:
 
             break;
 
-        case BK_STAGE_POWER_OFF:
-
+        case BK_STATE_IDLE:
+            /**
+             * IDLE 状态下，关闭射频
+             */
+            gpio_output_set(p_task->p_bk953x_object->p_rst_gpio, 0);
             break;
 
         default:
@@ -176,8 +191,9 @@ static void bk953x_stage_task_run(bk953x_task_t *p_task)
 void bk953x_loop_task(void)
 {
     bk953x_stage_task_run(&m_l_bk953x_task);
-//    bk953x_stage_task_run(&m_r_bk953x_task);
+    bk953x_stage_task_run(&m_r_bk953x_task);
 }
+
 
 void bk953x_task_stage_set(bk953x_lr_e lr, bk953x_task_stage_e stage)
 {
@@ -209,6 +225,8 @@ int bk9532_ch_index_set(bk953x_lr_e lr, uint16_t chan_index)
 
         freq_chan_obj.reg_value = BK9532_FREQ_632_MHZ + BK9532_FREQ_0_3_MHZ * (chan_index - SCREEN_L_CHANNEL_INDEX_MIN);
 
+        trace_debug("l bk9532_ch_index_set reg_val 0x%08x\n\r",freq_chan_obj.reg_value);
+
         return bk9532_freq_chan_set(&m_l_bk9532_obj, &freq_chan_obj);
     }
     else
@@ -219,6 +237,8 @@ int bk9532_ch_index_set(bk953x_lr_e lr, uint16_t chan_index)
         }
 
         freq_chan_obj.reg_value = BK9532_FREQ_660_MHZ + BK9532_FREQ_0_3_MHZ * (chan_index - SCREEN_R_CHANNEL_INDEX_MIN);
+
+        trace_debug("r bk9532_ch_index_set reg_val 0x%08x\n\r",freq_chan_obj.reg_value);
 
         return bk9532_freq_chan_set(&m_r_bk9532_obj, &freq_chan_obj);
     }
@@ -232,14 +252,10 @@ int bk953x_rf_rssi_get(bk953x_lr_e lr, uint8_t *p_level)
     if(lr == BK953X_L)
     {
         err_code = bk9532_rx_rssi_get(&m_l_bk9532_obj, &rssi);
-
-//        trace_debug("l rssi = %d\n\r",rssi);
     }
     else
     {
         err_code = bk9532_rx_rssi_get(&m_r_bk9532_obj, &rssi);
-
-//        trace_debug("r rssi = %d\n\r",rssi);
     }
 
     /**
@@ -281,14 +297,10 @@ int bk953x_af_get(bk953x_lr_e lr, uint8_t *p_level)
     if(lr == BK953X_L)
     {
         err_code = bk9532_rx_vol_get(&m_l_bk9532_obj, &af_vol);
-
-//        trace_debug("l af = %d\n\r",af_vol);
     }
     else
     {
         err_code = bk9532_rx_vol_get(&m_r_bk9532_obj, &af_vol);
-
-//        trace_debug("r af = %d\n\r",af_vol);
     }
 
     /**
@@ -322,3 +334,12 @@ int bk953x_af_get(bk953x_lr_e lr, uint8_t *p_level)
     return err_code;
 } 
 
+uint8_t bk953x_user_data_get(bk953x_lr_e lr)
+{
+    if(lr == BK953X_L)
+    {
+        return m_l_bk953x_task.user_date.byte;
+    }
+
+    return m_r_bk953x_task.user_date.byte;
+}

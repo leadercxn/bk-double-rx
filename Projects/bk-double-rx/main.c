@@ -5,6 +5,7 @@
 #include "ad22650_handler.h"
 #include "flash_handler.h"
 #include "lcd_display_handler.h"
+#include "ir_tx_handler.h"
 
 #define SCHED_MAX_EVENT_DATA_SIZE   8
 #define SCHED_QUEUE_SIZE            20
@@ -14,11 +15,14 @@ static app_scheduler_t  m_app_scheduler;
 uint8_t data[4] = {0x64, 0x23, 0x18, 0x74};
 
 /**
- * 供电开关状态
+ * 系统关机状态
  */
-uint8_t g_sys_power_on = 1;
-uint8_t g_old_sys_power_on = 1;
+uint8_t g_sys_power_off = 0;
+uint8_t g_old_sys_power_off = 0;
 
+/**
+ * 拨动开关
+ */
 static gpio_object_t   m_sys_power_sw_gpio = 
                 {
                     .gpio_port_periph_clk = SYS_POWER_SWITCH_PORT_PERIPH_CLK,
@@ -27,37 +31,54 @@ static gpio_object_t   m_sys_power_sw_gpio =
                     .gpio_pin = SYS_POWER_SWITCH_PIN,
                 };
 
-static char * mp_button[BUTTON_EVENT_MAX] = 
+typedef enum
 {
-  "BUTTON_R_EVENT_SET_PUSH",
-  "BUTTON_R_EVENT_SET_RELEASE",
-  "BUTTON_R_EVENT_LONG_SET",
+    CMD_FREQ = 0x01,
+    CMD_VOL,
+    CMD_TX_POWER,
+} ir_tx_cmd_e;
 
-  "BUTTON_R_EVENT_UP_PUSH",
-  "BUTTON_R_EVENT_UP_RELEASE",
-  "BUTTON_R_EVENT_DOWN_PUSH",
-  "BUTTON_R_EVENT_DOWN_RELEASE",
-  
+/**
+ * ir红外传输数据结构体
+ */
+typedef struct
+{
+    uint8_t len;
+    uint8_t band_type;
+    uint8_t region_band;
+    uint8_t freq_ch;
+} __attribute__((__packed__ )) ir_command_freq_t;
 
-  "BUTTON_L_EVENT_SET_PUSH",
-  "BUTTON_L_EVENT_SET_RELEASE",
-  "BUTTON_L_EVENT_LONG_SET",
+typedef struct main
+{
+    ir_tx_cmd_e cmd;
 
-  "BUTTON_L_EVENT_UP_PUSH",
-  "BUTTON_L_EVENT_UP_RELEASE",
-  "BUTTON_L_EVENT_DOWN_PUSH",
-  "BUTTON_L_EVENT_DOWN_RELEASE",
-};
+    union data 
+    {
+      ir_command_freq_t freq_data;
+      uint8_t           cmd_data[4];
+    } __attribute__((__packed__ )) tx_data;
+
+    uint8_t crc;
+} __attribute__((__packed__ )) ir_tx_data_t;
+
+
 
 /**
  * @brief 右侧adc按键回调
  */
 static void r_adc_button_handler(adc_button_event_e event)
 {
+    int err_code = 0;
     uint16_t r_index = 0;
 
     static uint64_t pre_ticks = 0;
     uint64_t now_ticks = mid_timer_ticks_get();
+
+    if(g_sys_power_off)
+    {
+      return;
+    }
 
     /**
      * 两个时间得间隔200ms
@@ -70,8 +91,6 @@ static void r_adc_button_handler(adc_button_event_e event)
     {
       return;
     }
-
-    trace_debug("r_adc_button_handler event = %s\n\r",mp_button[event]);
 
     /**
      * 上下按键
@@ -100,6 +119,10 @@ static void r_adc_button_handler(adc_button_event_e event)
         }
 
         channel_index_lr_set(SCREEN_R, r_index);
+        g_app_param.r_ch_index = (uint8_t)r_index;
+
+        bk9532_ch_index_set(BK953X_R, r_index);
+        app_param_flash_update();
     }
 
     /**
@@ -109,11 +132,24 @@ static void r_adc_button_handler(adc_button_event_e event)
     {
         if(R_SETTING_MODE != channel_settings_mode_get())
         {
+            ir_tx_data_t ir_tx_data;
+
+            ir_tx_data.cmd = CMD_FREQ;
+            ir_tx_data.tx_data.freq_data.len = 3;
+            ir_tx_data.tx_data.freq_data.band_type = g_app_param.band_type;
+            ir_tx_data.tx_data.freq_data.region_band = g_app_param.region_band;
+            ir_tx_data.tx_data.freq_data.freq_ch = g_app_param.r_ch_index;
+
+            ir_tx_data.crc = ir_tx_data.tx_data.freq_data.band_type + ir_tx_data.tx_data.freq_data.region_band  \
+                              + ir_tx_data.tx_data.freq_data.freq_ch;
+
             channel_settings_mode_set(R_SETTING_MODE);
+            ir_tx_task_state_set(IR_TASK_WORK, (uint8_t *)&ir_tx_data, sizeof(ir_tx_data_t));
         }
         else
         {
             channel_settings_mode_set(EXIT_SET_MODE);
+            ir_tx_task_state_set(IR_TASK_IDLE, NULL, 0);
         }
     }
 
@@ -128,11 +164,17 @@ static void r_adc_button_handler(adc_button_event_e event)
  */
 static void l_adc_button_handler(adc_button_event_e event)
 {
+    int err_code = 0;
     uint16_t l_index = 0;
 
     static uint64_t pre_ticks = 0;
 
     uint64_t now_ticks = mid_timer_ticks_get();
+
+    if(g_sys_power_off)
+    {
+      return;
+    }
 
     /**
      * 两个时间得间隔200ms
@@ -145,8 +187,6 @@ static void l_adc_button_handler(adc_button_event_e event)
     {
       return;
     }
-
-    trace_debug("l_adc_button_handler event = %s\n\r",mp_button[event]);
 
     /* 左边 */
     if((event >= BUTTON_L_EVENT_UP_PUSH) && (event <= BUTTON_L_EVENT_DOWN_RELEASE))
@@ -173,6 +213,10 @@ static void l_adc_button_handler(adc_button_event_e event)
         }
       
         channel_index_lr_set(SCREEN_L, l_index);
+        g_app_param.l_ch_index = (uint8_t)l_index;
+
+        bk9532_ch_index_set(BK953X_L, l_index);
+        app_param_flash_update();
     }
 
     /**
@@ -182,11 +226,24 @@ static void l_adc_button_handler(adc_button_event_e event)
     {
         if(L_SETTING_MODE != channel_settings_mode_get())
         {
+            ir_tx_data_t ir_tx_data;
+
+            ir_tx_data.cmd = CMD_FREQ;
+            ir_tx_data.tx_data.freq_data.len = 3;
+            ir_tx_data.tx_data.freq_data.band_type = g_app_param.band_type;
+            ir_tx_data.tx_data.freq_data.region_band = g_app_param.region_band;
+            ir_tx_data.tx_data.freq_data.freq_ch = g_app_param.l_ch_index;
+
+            ir_tx_data.crc = ir_tx_data.tx_data.freq_data.band_type + ir_tx_data.tx_data.freq_data.region_band  \
+                              + ir_tx_data.tx_data.freq_data.freq_ch;
+
             channel_settings_mode_set(L_SETTING_MODE);
+            ir_tx_task_state_set(IR_TASK_WORK, (uint8_t *)&ir_tx_data, sizeof(ir_tx_data_t));
         }
         else
         {
             channel_settings_mode_set(EXIT_SET_MODE);
+            ir_tx_task_state_set(IR_TASK_IDLE, NULL, 0);
         }
     }
 
@@ -209,22 +266,31 @@ static void app_param_init(void)
     channel_index_lr_set(SCREEN_R, g_app_param.r_ch_index);
 }
 
+/**
+ * @brief 拨动开关开关机handler
+ */
 static void sys_power_sw_handler(void)
 {
-    gpio_input_get(&m_sys_power_sw_gpio, &g_sys_power_on);
+    gpio_input_get(&m_sys_power_sw_gpio, &g_sys_power_off);
     
-    if(g_old_sys_power_on != g_sys_power_on)
+    if(g_old_sys_power_off != g_sys_power_off)
     {
-        if(g_sys_power_on)
+        if(g_sys_power_off)
         {
-          lcd_off_status_set(true);
+            lcd_off_status_set(true);
+            bk953x_task_stage_set(BK953X_L, BK_STATE_IDLE);
+            bk953x_task_stage_set(BK953X_R, BK_STATE_IDLE);
+            trace_debug("TURN OFF POWER-SWITCH\n\r");
         }
         else
         {
-          lcd_off_status_set(false);
+            lcd_off_status_set(false);
+            bk953x_task_stage_set(BK953X_L, BK_STAGE_INIT);
+            bk953x_task_stage_set(BK953X_R, BK_STAGE_INIT);
+            trace_debug("TURN ON POWER-SWITCH\n\r");
         }
 
-        g_old_sys_power_on = g_sys_power_on;
+        g_old_sys_power_off = g_sys_power_off;
     }
 }
 
@@ -241,10 +307,17 @@ static void host_loop_task(void)
   uint8_t l_af_level = 0;
   uint8_t r_af_level = 0;
 
+  union user_spec_data l_user_data = {
+    .byte = 0,
+  };
+
+  union user_spec_data r_user_data = {
+    .byte = 0,
+  };
+
   static uint64_t old_bk9532_ticks = 0;
-  static uint64_t old_ir_ticks = 0;
   
-  /* 15ms 刷新一次 */
+  /* 15ms 刷新一次 af 和 rf */
   if( mid_timer_ticks_get() - old_bk9532_ticks > 100)
   {
     old_bk9532_ticks = mid_timer_ticks_get();
@@ -262,21 +335,22 @@ static void host_loop_task(void)
     channel_af_level_lr_set(SCREEN_R, r_af_level);
   }
 
-  if( mid_timer_ticks_get() - old_ir_ticks > 20000)
+  /**
+   * 收到同步信息，退出红外发射模式
+   */
+  l_user_data.byte = bk953x_user_data_get(BK953X_L);
+  if(l_user_data.user_data.chan_sync_flag)
   {
-      old_ir_ticks = mid_timer_ticks_get();
-
-      err_code = ir_tx_start(data, sizeof(data));
-      if(err_code)
-      {
-        trace_error("ir_tx_start error %d\n\r",err_code);
-      }
-      else
-      {
-        trace_debug("ir_tx_start success\n\r");
-      }
+      channel_settings_mode_set(EXIT_SET_MODE);
+      ir_tx_task_state_set(IR_TASK_IDLE, NULL, 0);
   }
-  
+
+  r_user_data.byte = bk953x_user_data_get(BK953X_R);
+  if(r_user_data.user_data.chan_sync_flag)
+  {
+      channel_settings_mode_set(EXIT_SET_MODE);
+      ir_tx_task_state_set(IR_TASK_IDLE, NULL, 0);
+  }
 }
 
 int main(void)
@@ -307,10 +381,10 @@ int main(void)
       lcd_black_light_enable(false);    //  关掉LCD显示
       lcd_ctrl_enable(false);
       delay_ms(50);
-      gpio_input_get(&m_sys_power_sw_gpio, &g_sys_power_on);
-      g_old_sys_power_on = g_sys_power_on;
-  } while(g_sys_power_on);
-  trace_info("Power On\n\r");
+      gpio_input_get(&m_sys_power_sw_gpio, &g_sys_power_off);
+      g_old_sys_power_off = g_sys_power_off;
+  } while(g_sys_power_off);
+  trace_info("POWER On\n\r");
   
   lcd_display_init();
 
@@ -322,29 +396,11 @@ int main(void)
   r_adc_button_event_handler_register(r_adc_button_handler);
 
   bk9532_lr_init();
+  bk9532_ch_index_set(BK953X_L, g_app_param.l_ch_index);
+  bk9532_ch_index_set(BK953X_R, g_app_param.r_ch_index);
+
   ad22650_lr_init();
 
-#if 0
-  err_code = bk953x_ch_index_set(BK953X_L, 1);
-  if(err_code)
-  {
-    trace_error("l ch index set error\n\r");
-  }
-  else
-  {
-    trace_debug("l ch index set success\n\r");
-  }
-
-  err_code = bk953x_ch_index_set(BK953X_R, 101);
-  if(err_code)
-  {
-    trace_error("r ch index set error\n\r");
-  }
-  else
-  {
-    trace_debug("r ch index set success\n\r");
-  }
-#endif
   APP_SCHED_INIT(&m_app_scheduler, SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
 
   trace_info("Start loop\n\r");
@@ -355,8 +411,8 @@ int main(void)
     mid_timer_loop_task();
     bk953x_loop_task();
     lcd_display_loop_task();
+    ir_tx_loop_task();
     host_loop_task();
-  
     sys_power_sw_handler();
   }
 }
